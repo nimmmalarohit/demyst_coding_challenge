@@ -45,7 +45,7 @@ def get_field_positions(offsets):
     return field_positions
 
 
-def parse_fixed_width_to_csv(input_file, output_file):
+def write_parsed_data_to_csv(input_file, output_file):
     """
     This method is used to read the input file, create a list of tuple consisting position and offset,
     then offset position list use string slicing function to parse the input file as row, and write each row into output file
@@ -71,6 +71,6 @@ input_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 's
 output_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'parsed_data.csv')
 
 # Run the parser function
-parse_fixed_width_to_csv(input_file, output_file)
+write_parsed_data_to_csv(input_file, output_file)
 
 print(f"CSV file '{output_file}' generated successfully.")
