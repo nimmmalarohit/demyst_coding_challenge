@@ -2,11 +2,8 @@ import unittest
 import os
 import sys
 import json
-from io import StringIO
-import csv
 
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 import data_parser
 
 
