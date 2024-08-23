@@ -1,24 +1,29 @@
 """
-Generating the csv file with first_name, last_name, address, date_of_birth and Anonymize the data
+Generating the CSV file with first_name, last_name, address, date_of_birth and Anonymizing the data.
 
-                Problem 2
-                Data processing
-Generate a csv file containing first_name, last_name, address, date_of_birth
-Process the csv file to anonymise the data
-Columns to anonymise are first_name, last_name and address
-You might be thinking that is silly
-Now make this work on 2GB csv file (should be doable on a laptop)
-Demonstrate that the same can work on bigger dataset
-Hint - You would need some distributed computing platform
+Problem 2: Data Processing
+- Generate a CSV file containing first_name, last_name, address, and date_of_birth.
+- Process the CSV file to anonymize the data.
+- Columns to anonymize are first_name, last_name, and address.
+- Ensure the solution can efficiently handle a 2GB CSV file on a typical laptop.
+- Demonstrate that the same solution can scale to process even larger datasets.
+- Hint: Achieve scalability and efficiency using a distributed computing platform like Apache Spark.
 """
 
 import csv
 import os
 import faker
 import hashlib
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
 
 
 def generate_random_data(fake):
+    """
+    Generate a dictionary containing fake data for first_name, last_name, address, and date_of_birth.
+    :param fake: A Faker instance for generating realistic fake data.
+    :return: dict: A dictionary with keys 'first_name', 'last_name', 'address', and 'date_of_birth'.
+    """
     return {
         'first_name': fake.first_name(),
         'last_name': fake.last_name(),
@@ -27,23 +32,13 @@ def generate_random_data(fake):
     }
 
 
-def anonymize_data(data):
-    """Anonymize the data by hashing."""
-    return hashlib.sha256(data.encode()).hexdigest()
-
-
-def anonymize_rows(row):
-    row['first_name'] = anonymize_data(row['first_name'])
-    row['last_name'] = anonymize_data(row['last_name'])
-    row['address'] = anonymize_data(row['address'])
-    return row
-
-
 # Initialize Faker library to generate fake data
 fake = faker.Faker()
 
 # Filepath for the generated CSV
 csv_output_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'large_sample_data.csv')
+
+# This specifies where the generated and anonymized CSV files will be saved.
 anonymize_data_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'anonymize_data.csv')
 
 # Number of records to generate
@@ -51,9 +46,11 @@ num_records = 1000
 chunk_size = 1000
 
 # Generate the CSV file
+# The data is generated and written in chunks to minimize memory usage.
 with open(csv_output_file, 'w', newline='', buffering=chunk_size) as csvfile:
     fieldnames = ['first_name', 'last_name', 'address', 'date_of_birth']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    # Write the header row with column names
     writer.writeheader()
     for _ in range(num_records):
         writer.writerow(generate_random_data(fake))
@@ -61,26 +58,21 @@ with open(csv_output_file, 'w', newline='', buffering=chunk_size) as csvfile:
 
 print(f'{csv_output_file} generated with {num_records} records.')
 
+# Initialize Spark session for processing the CSV file
+# Spark is used here to leverage its distributed computing capabilities, which allows
+# processing of large datasets that may exceed the memory limits of a single machine.
+spark = SparkSession.builder.master("local[*]").getOrCreate()
 
-# Process and anonymize a CSV file in chunks.
-with open(csv_output_file, 'r') as infile, open(anonymize_data_file, 'w', newline='') as outfile:
-    reader = csv.DictReader(infile)
-    writer = csv.DictWriter(outfile, fieldnames=reader.fieldnames)
-    writer.writeheader()
-    while True:
-        rows = []
-        try:
-            for _ in range(chunk_size):
-                rows.append(next(reader))
-        except StopIteration:
-            break
+# Read the generated CSV file into a Spark DataFrame
+# The DataFrame API in Spark is leveraged for efficient distributed processing.
+generated_data_df = spark.read.option("header", "true").option("delimiter", ",").csv(csv_output_file)
 
-        if not rows:
-            break
-        for row in rows:
-            row = anonymize_rows(row)
-            writer.writerow(row)
+# Anonymize the specified columns using SHA-256 hashing
+df_anonymized = generated_data_df.withColumn("first_name", F.sha2("first_name", 256)) \
+                  .withColumn("last_name", F.sha2("last_name", 256)) \
+                  .withColumn("address", F.sha2("address", 256))
 
-        print(f'Processed {len(rows)} rows...')
-
-print(f'{anonymize_data_file} generated with anonymized data.')
+# Write the anonymized data to a new CSV file
+# The processed data is written out in a distributed manner, ensuring that the entire
+df_anonymized.write.csv(anonymize_data_file, header=True, mode="overwrite")
+spark.stop()
