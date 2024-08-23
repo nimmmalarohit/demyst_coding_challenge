@@ -2,12 +2,12 @@
 Generating the CSV file with first_name, last_name, address, date_of_birth and Anonymizing the data.
 
 Problem 2: Data Processing
-- Generate a CSV file containing first_name, last_name, address, and date_of_birth.
-- Process the CSV file to anonymize the data.
-- Columns to anonymize are first_name, last_name, and address.
-- Ensure the solution can efficiently handle a 2GB CSV file on a typical laptop.
-- Demonstrate that the same solution can scale to process even larger datasets.
-- Hint: Achieve scalability and efficiency using a distributed computing platform like Apache Spark.
+ - Generate a CSV file containing first_name, last_name, address, and date_of_birth.
+ - Process the CSV file to anonymize the data.
+ - Columns to anonymize are first_name, last_name, and address.
+ - Ensure the solution can efficiently handle a 2GB CSV file on a typical laptop.
+ - Demonstrate that the same solution can scale to process even larger datasets.
+ - Hint: Achieve scalability and efficiency using a distributed computing platform like Apache Spark.
 """
 
 import csv
@@ -54,7 +54,7 @@ with open(csv_output_file, 'w', newline='', buffering=chunk_size) as csvfile:
     writer.writeheader()
     for _ in range(num_records):
         writer.writerow(generate_random_data(fake))
-        print(f"records written: {_+1}")
+        # print(f"records written: {_+1}")
 
 print(f'{csv_output_file} generated with {num_records} records.')
 
@@ -76,3 +76,5 @@ df_anonymized = generated_data_df.withColumn("first_name", F.sha2("first_name", 
 # The processed data is written out in a distributed manner, ensuring that the entire
 df_anonymized.write.csv(anonymize_data_file, header=True, mode="overwrite")
 spark.stop()
+
+print(f'{anonymize_data_file} generated.')
