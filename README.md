@@ -9,12 +9,15 @@
 #### Change the directory to the path where Dockerfile is present
 `cd demyst_coding_challenge`
 
-
 ### Step3: 
+#### Install required Pyython packages.
+`pip install -r requirements.txt`
+
+### Step4: 
 #### Below command builds a Docker image from the Dockerfile in the current directory.
 `docker build -t data-parser-app .`
 
 
-### Step 4: 
+### Step 5: 
 #### Run the Below command to build the Docker image for the project. This executes the tests inside a containerized environment.
 `docker run --rm data-parser-app`
