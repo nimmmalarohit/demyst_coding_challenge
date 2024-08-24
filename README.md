@@ -6,9 +6,25 @@
 - Source code for Problem 2 is present in `src/data_processing.py`
 
 
-#### Steps to Build and run the code for Problem 1 and Problem 2 in Docker.
+### 1. Steps to run the scripts for Problem 1 and Problem 2 in local env.
+-  **Step 1:** Clone this git repo<br>
+``` buildoutcfg
+git clone https://github.com/nimmmalarohit/demyst_coding_challenge.git
+``` 
 
 
+-  **Step 2**: Change the directory to the path where entrypoint.sh is present<br>
+``` buildoutcfg
+cd demyst_coding_challenge
+```
+
+-  **Step 3**: Run the entrypoint.sh script<br>
+``` buildoutcfg
+sh entrypoint.sh
+```
+
+
+### 2. Steps to Build and run the code for Problem 1 and Problem 2 in Docker.
 -  **Step 1:** Clone this git repo<br>
 ``` buildoutcfg
 git clone https://github.com/nimmmalarohit/demyst_coding_challenge.git
